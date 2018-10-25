@@ -17,6 +17,9 @@ if(NOT TARGET LSL::lsl)
 	include(LSLCMake)
 endif()
 
+# Include cmake modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 # Meta information about the project
 set(META_PROJECT_DESCRIPTION "Send Wii data streams (Wiimote, balanceboard, etc) to LSL Outlet.")
 set(META_AUTHOR_ORGANIZATION "Ottawa Hospital Research Institute")
