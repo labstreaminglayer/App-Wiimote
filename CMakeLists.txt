@@ -73,7 +73,7 @@ IF(UNIX)
 	target_link_libraries(${PROJECT_NAME} PRIVATE
 		${WIIUSE_INSTALL_DIR}/lib/libwiiuse.a)
 elseif(WIN32)
-	target_add_definitions(${PROJECT_NAME} PRIVATE -DWIIUSE_STATIC)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE -DWIIUSE_STATIC)
 	target_link_libraries(${PROJECT_NAME}
 		PRIVATE
         debug ${WIIUSE_INSTALL_DIR}/lib/wiiuse_debug.lib
