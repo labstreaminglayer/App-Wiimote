@@ -77,10 +77,13 @@ IF(UNIX)
 		${WIIUSE_INSTALL_DIR}/lib/libwiiuse.a)
 elseif(WIN32)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE -DWIIUSE_STATIC)
+	# TODO: have externalproject generate both
 	target_link_libraries(${PROJECT_NAME}
 		PRIVATE
-        debug ${WIIUSE_INSTALL_DIR}/lib/wiiuse_debug.lib
-        optimized ${WIIUSE_INSTALL_DIR}/lib/wiiuse.lib)
+		${WIIUSE_INSTALL_DIR}/lib/wiiuse_debug.lib
+#		debug ${WIIUSE_INSTALL_DIR}/lib/wiiuse_debug.lib
+#		optimized ${WIIUSE_INSTALL_DIR}/lib/wiiuse.lib
+	)
 ENDIF()
 
 # Platform libraries required by Wiiuse
