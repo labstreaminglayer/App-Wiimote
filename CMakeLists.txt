@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(Wiimote
-	LANGUAGES CXX
-	VERSION 0.1.0)
+	LANGUAGES CXX C
+	VERSION 0.1.1)
 include(Findliblsl.cmake)
 
 # Include cmake modules
@@ -12,10 +12,13 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
-find_package(Qt5 REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets REQUIRED)
+get_property(qtloc TARGET Qt${QT_VERSION_MAJOR}::Core PROPERTY IMPORTED_LOCATION_RELEASE)
+message(STATUS "FOUND Qt version Qt${QT_VERSION_MAJOR}" lib in ${qtloc})
 
 #Wiiuse
-include(ExternalProject)
+include(ExternalProject)  # TODO: Update to `FetchContent`
 set(WIIUSE_INSTALL_DIR ${CMAKE_CURRENT_LIST_DIR}/deps/local)
 ExternalProject_Add(wiiuse
     PREFIX ${CMAKE_CURRENT_LIST_DIR}/deps/wiiuse
@@ -75,7 +78,7 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE
-	Qt5::Widgets
+	Qt${QT_VERSION_MAJOR}::Widgets
 	LSL::lsl
     ${WIIUSE_LIB}
     ${PLATFORM_LIBS}
