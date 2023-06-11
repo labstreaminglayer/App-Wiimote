@@ -64,10 +64,10 @@ else(WIN32)
 endif(APPLE)
 
 add_executable(${PROJECT_NAME} MACOSX_BUNDLE WIN32
-	main.cpp
-	mainwindow.cpp
-	mainwindow.h
-	mainwindow.ui
+		src/main.cpp
+		src/mainwindow.cpp
+		src/mainwindow.h
+		src/mainwindow.ui
 )
 
 add_dependencies(${PROJECT_NAME} wiiuse)
