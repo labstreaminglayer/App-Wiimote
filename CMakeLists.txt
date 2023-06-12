@@ -38,7 +38,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
 include(FetchContent)
 set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
 FetchContent_Declare(wiiuse
-        GIT_REPOSITORY https://github.com/rpavlik/wiiuse.git
+        GIT_REPOSITORY https://github.com/wiiuse/wiiuse.git
         GIT_TAG master
         GIT_SHALLOW 1
         )
