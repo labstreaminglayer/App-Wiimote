@@ -5,7 +5,7 @@ project(Wiimote
     VERSION 0.2.0)
 
 # Include custom cmake modules
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+# list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Config
 set(CMAKE_CXX_STANDARD 17)
