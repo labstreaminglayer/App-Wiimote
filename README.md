@@ -26,7 +26,7 @@ If your Wiimote had been paired successfully the remote will emit a short hum an
 
 > ![wiimote-success.png](wiimote-success.png)
 
-Otherwise the app will keep prompting you to first pair the Wiimote and then confirm with Enter until the bluetooth connection has succeeded.
+Otherwise, the app will keep prompting you to first pair the Wiimote and then confirm with Enter until the bluetooth connection has succeeded.
 
 > ![wiimote-retry.png](wiimote-retry.png)
 
@@ -57,33 +57,23 @@ The marker stream has a single channel that contains string-formatted samples (a
 
 ### Dependencies
 
-    * cmake
-    * Qt5
-    * Compiler (+ IDE)
-        * Tested with Visual Studio 2015 32-bit and 64-bit, Xcode clang
+    * Qt6
+        * Windows: [download open source](https://www.qt.io/download-open-source)
+            * The install directory must be added to the cmake command: `-DCMAKE_PREFIX_PATH=path/to/Qt/6.x.x/<platform>/`
+        * Mac: `brew install qt`
+        * Ubuntu: `sudo apt-get install -y qt6-base-dev`
+            * 20.04 might first need `sudo add-apt-repository -y ppa:okirby/qt6-backports`
+    * [LSL](https://github.com/sccn/liblsl#getting-and-using-liblsl)
+        * Windows, add to CMake command: `-DLSL_ROOT=path/to/LSL`
+    * Compiler
+        * Tested with MSVC, gcc on MinGW, Apple Clang, gcc on Ubuntu 22.04 
     * Windows-only:
         * [WinHID](https://developer.microsoft.com/en-us/windows/hardware/download-kits-windows-hardware-development)
             * You may already have this installed with Visual Studio.
 
 ### Build Instructions
 
-On Mac/Linux
-
 ```
-mkdir build && cd build
-cmake -DLSL_ROOT=path/to/labstreaminglayer/build/lsl_Release/lslinstall/LSL ..
-make
-make install
+cmake -S . -B build
+cmake --build build --config Release -j --target install
 ```
-
-On Windows, the cmake command needs the Qt5_DIR and the generator if Win64 specified as well. e.g.,
-(modify below with your Qt5 dir and LSL install dir)
-
-```
-mkdir build && cd build
-cmake -DQt5_DIR=C:\Qt\5.9.1\msvc2015_64\lib\cmake\Qt5 -DLSL_ROOT=D:\full\path\to\labstreaminglayer\build\lsl_Release\lslinstall\LSL -G "Visual Studio 14 2015 Win64" ..
-```
-
-Then open up the visual studio solution, change the Solution Configuration drop down to Release, right click on the INSTALL target, then Build.
-
-
