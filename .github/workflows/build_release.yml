@@ -19,6 +19,10 @@ defaults:
   run:
     shell: bash
 
+env:
+  LSL_RELEASE_URL: 'https://github.com/sccn/liblsl/releases/download'
+  LSL_RELEASE: '1.16.2'
+
 jobs:
   build:
     name: ${{ matrix.config.name }}
