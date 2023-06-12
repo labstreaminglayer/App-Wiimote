@@ -67,9 +67,9 @@ The marker stream has a single channel that contains string-formatted samples (a
         * Windows, add to CMake command: `-DLSL_ROOT=path/to/LSL`
     * Compiler
         * Tested with MSVC, gcc on MinGW, Apple Clang, gcc on Ubuntu 22.04 
-    * Windows-only:
-        * [WinHID](https://developer.microsoft.com/en-us/windows/hardware/download-kits-windows-hardware-development)
-            * You may already have this installed with Visual Studio.
+    * [WinHID via WDK](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk) (Windows only)
+        * You likely already have this installed with Visual Studio.
+    * Ubuntu extra: `sudo apt-get install libbluetooth-dev libgl1-mesa-dev`
 
 ### Build Instructions
 
