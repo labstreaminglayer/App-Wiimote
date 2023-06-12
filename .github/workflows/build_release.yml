@@ -85,6 +85,7 @@ jobs:
           cmake --version
           cmake -B build -S . \
           -DCMAKE_BUILD_TYPE=Release \
+          -DLSL_INSTALL_ROOT=$PWD/LSL/ \
           -DCMAKE_INSTALL_PREFIX=${PWD}/install \
           -DCPACK_PACKAGE_DIRECTORY=${PWD}/package \
           -DCPACK_DEBIAN_PACKAGE_SHLIBDEPS=ON \
