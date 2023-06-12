@@ -87,4 +87,4 @@ endif()
 
 # Deployment
 installLSLApp(${PROJECT_NAME})
-# LSLGenerateCPackConfig()
+LSLGenerateCPackConfig()
