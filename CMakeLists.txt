@@ -1,90 +1,90 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.14)
 
 project(Wiimote
-	LANGUAGES CXX C
-	VERSION 0.1.1)
-include(Findliblsl.cmake)
+    LANGUAGES CXX C
+    VERSION 0.2.0)
 
-# Include cmake modules
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+# Include custom cmake modules
+# list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
+# Config
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
+set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
+set(LSL_COMFY_DEFAULTS ON)
+
+# Thirdparty Libraries
+
+## LSL
+# Find an installed liblsl in paths set by the user (LSL_INSTALL_ROOT)
+# and some default paths
+find_package(LSL REQUIRED
+        HINTS ${LSL_INSTALL_ROOT}
+        "${CMAKE_CURRENT_LIST_DIR}/../../LSL/liblsl/install"
+        "${CMAKE_CURRENT_LIST_DIR}/../../LSL/liblsl/build/"
+        "${CMAKE_CURRENT_LIST_DIR}/../../LSL/liblsl/build/install"
+        "${CMAKE_CURRENT_LIST_DIR}/../../LSL/liblsl/out/build/x64-Release"
+        "${CMAKE_CURRENT_LIST_DIR}/../../LSL/liblsl/out/install/x64-Release"
+        PATH_SUFFIXES share/LSL)
+
+## Qt
+set(CMAKE_AUTOMOC ON)  # The later version of this in LSLCMake is somehow not enough.
 set(CMAKE_AUTORCC ON)
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets REQUIRED)
-get_property(qtloc TARGET Qt${QT_VERSION_MAJOR}::Core PROPERTY IMPORTED_LOCATION_RELEASE)
-message(STATUS "FOUND Qt version Qt${QT_VERSION_MAJOR}" lib in ${qtloc})
+set(CMAKE_AUTOUIC ON)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
 
-#Wiiuse
-include(ExternalProject)  # TODO: Update to `FetchContent`
-set(WIIUSE_INSTALL_DIR ${CMAKE_CURRENT_LIST_DIR}/deps/local)
-ExternalProject_Add(wiiuse
-    PREFIX ${CMAKE_CURRENT_LIST_DIR}/deps/wiiuse
-    INSTALL_DIR ${WIIUSE_INSTALL_DIR}
-    GIT_REPOSITORY https://github.com/rpavlik/wiiuse.git
-    GIT_TAG updates
-    GIT_SHALLOW 1
-    CMAKE_GENERATOR ${gen}
-    CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-        -DCMAKE_INCLUDE_PATH=${WIIUSE_INSTALL_DIR}/include
-        -DCMAKE_LIBRARY_PATH=${WIIUSE_INSTALL_DIR}/lib
-        -DBUILD_WIIUSE_SHARED_LIB:BOOL=OFF
-        -DBUILD_EXAMPLE:BOOL=OFF
-        -DBUILD_EXAMPLE_SDL:BOOL=OFF
-)
-IF(APPLE)
-    set(WIIUSE_LIB ${WIIUSE_INSTALL_DIR}/lib/libwiiuse.a)
-ELSEIF(WIN32)
-    add_definitions(-DWIIUSE_STATIC)
-    set(WIIUSE_LIB
-        debug ${WIIUSE_INSTALL_DIR}/lib/wiiuse_debug.lib
-        optimized ${WIIUSE_INSTALL_DIR}/lib/wiiuse.lib)
-ENDIF()
+## Wiiuse
+include(FetchContent)
+set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
+FetchContent_Declare(wiiuse
+        GIT_REPOSITORY https://github.com/wiiuse/wiiuse.git
+        GIT_TAG master
+        GIT_SHALLOW 1
+        )
+FetchContent_MakeAvailable(wiiuse)
 
-# Platform libraries required by Wiiuse
-set(PLATFORM_LIBS)
-if(APPLE)
-    find_library(IOBLUETOOTH_FRAMEWORK
-        NAMES
-        IOBluetooth)
-    find_library(COREFOUNDATION_FRAMEWORK
-        NAMES
-        CoreFoundation)
-    find_library(FOUNDATION_FRAMEWORK
-        NAMES
-        Foundation)
-    list(APPEND PLATFORM_LIBS ${IOBLUETOOTH_FRAMEWORK} ${COREFOUNDATION_FRAMEWORK} ${FOUNDATION_FRAMEWORK})
-else(WIN32)
-    find_package(WinHID REQUIRED)
-    include_directories(${WINHID_INCLUDE_DIRS})
-    list(APPEND PLATFORM_LIBS ws2_32 setupapi ${WINHID_LIBRARIES})
-endif(APPLE)
-
+# Target
 add_executable(${PROJECT_NAME} MACOSX_BUNDLE WIN32
-	main.cpp
-	mainwindow.cpp
-	mainwindow.h
-	mainwindow.ui
+        src/main.cpp
+        src/mainwindow.cpp
+        src/mainwindow.h
+        src/mainwindow.ui
 )
-
-add_dependencies(${PROJECT_NAME} wiiuse)
-
-target_include_directories(${PROJECT_NAME}
-    PRIVATE
-    ${WIIUSE_INSTALL_DIR}/include)
-
 target_link_libraries(${PROJECT_NAME}
-	PRIVATE
-	Qt${QT_VERSION_MAJOR}::Widgets
-	LSL::lsl
-    ${WIIUSE_LIB}
-    ${PLATFORM_LIBS}
+    PRIVATE
+        Qt6::Widgets
+        LSL::lsl
+        wiiuse
 )
+target_include_directories(${PROJECT_NAME} PRIVATE ${WIIUSE_INCLUDE_DIRS})
+target_compile_definitions(${PROJECT_NAME} PRIVATE WIIUSE_STATIC)
 
+## Copy dlls to build so that you can debug in IDE
+if (WIN32)
+    get_target_property(QT_QMAKE_EXECUTABLE Qt::qmake IMPORTED_LOCATION)
+    get_filename_component(QT_WINDEPLOYQT_EXECUTABLE ${QT_QMAKE_EXECUTABLE} PATH)
+    set(QT_WINDEPLOYQT_EXECUTABLE "${QT_WINDEPLOYQT_EXECUTABLE}/windeployqt.exe")
 
-# Deployment #
+    add_custom_command(
+            TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND
+                ${QT_WINDEPLOYQT_EXECUTABLE}
+                --no-translations --no-system-d3d-compiler --qmldir ${CMAKE_CURRENT_SOURCE_DIR}
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+    add_custom_command(
+            TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND
+                ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}>
+                $<TARGET_FILE_DIR:${PROJECT_NAME}>
+            COMMAND_EXPAND_LISTS
+    )
+endif()
+
+# Deployment
 installLSLApp(${PROJECT_NAME})
 LSLGenerateCPackConfig()
